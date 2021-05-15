@@ -1,6 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
 import Filter from "../../shared/components/filter/filter.component";
-import { SearchBarView, ContentLoadingIndicator, WarningText, WarningContainer } from "./country-list.styles";
+import {
+  SearchBarView,
+  ContentLoadingIndicator,
+  WarningText,
+  WarningContainer,
+} from "./country-list.styles";
 import { CountryContext } from "../../providers/country-list/country-list.context";
 import CountryFlatList from "./country-flat-list.component";
 
@@ -9,47 +14,54 @@ const CountryListScreen = () => {
   const [countryList, setCountryList] = useState(null);
   const [sortBy, setSortBy] = useState("name");
   const [isAscending, setIsAscending] = useState(true);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   useEffect(() => {
-      transformResult(); 
-  },[result, sortBy, isAscending])
+    transformResult();
+  }, [result, sortBy, isAscending]);
 
   const transformResult = () => {
-    if(result && result.countries) {
-      const data = result.countries.slice().sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
+    if (result && result.countries) {
+      const data = result.countries
+        .slice()
+        .sort((a, b) => a[sortBy].localeCompare(b[sortBy]));
       setCountryList(isAscending ? data : data.reverse());
-     } else {
+    } else {
       setCountryList(null);
-     }
-  }
-
+    }
+  };
 
   return (
     <>
       <SearchBarView
         placeholder="Input continent code (EU, AS ...)"
+        value={searchKeyword}
         onChangeText={(query) => {
-          search(query);
+          setSearchKeyword(query);
+        }}
+        onSubmitEditing={() => {
+          search(searchKeyword);
         }}
         autoCapitalize="characters"
         clearIcon={null}
       />
-      <Filter onFilterChange={(value) => setSortBy(value)} onSortChange={(value) => setIsAscending(value)}/>
+      <Filter
+        onFilterChange={(value) => setSortBy(value)}
+        onSortChange={(value) => setIsAscending(value)}
+      />
       {isLoading ? (
         <ContentLoadingIndicator size="large" animating={true} />
       ) : error ? (
         <WarningContainer>
-        
-        <WarningText>Something went wrong</WarningText>
+          <WarningText>Something went wrong</WarningText>
         </WarningContainer>
-      ) : result ? (
+      ) : countryList  ? (
         <CountryFlatList countries={countryList} />
       ) : (
         <WarningContainer>
-        
-        <WarningText>
-          Start by searching with continent codeee
-        </WarningText>
+          <WarningText>
+            Start by searching with continent code
+          </WarningText>
         </WarningContainer>
       )}
     </>
